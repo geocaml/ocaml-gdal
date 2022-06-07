@@ -1,0 +1,20 @@
+(library
+ (name gdal_c)
+ (public_name gdal.c)
+ (flags
+  (:standard -w -9-27))
+ (libraries geo)
+ (ctypes
+  (external_library_name gdal)
+  (build_flags_resolver pkg_config)
+  (headers
+   (include "gdal.h"))
+  (type_description
+   (instance Type)
+   (functor Type_description))
+  (function_description
+   (concurrency sequential)
+   (instance Functions)
+   (functor Function_description))
+  (generated_types Types_generated)
+  (generated_entry_point C)))
