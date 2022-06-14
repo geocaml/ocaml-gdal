@@ -5,6 +5,8 @@ module Error = struct
   type t = [ `Debug | `Warning | `Failure ]
 end
 
+let register = Lazy.from_fun F.all_register
+
 module Datatype = struct
   type t = T.Datatype.t
   (** @include *)
@@ -16,8 +18,17 @@ end
 module Driver = struct
   type t = unit Ctypes_static.ptr
 
-  let get_by_name = F.Driver.get_by_name
-  let get_count = F.Driver.get_count
+  let get_by_name s =
+    Lazy.force register;
+    let driver = F.Driver.get_by_name s in
+    if Ctypes.is_null driver then Error (`Msg "Could not find driver")
+    else Ok driver
+
+  let get_count =
+    Lazy.force register;
+    F.Driver.get_count
+
+  let description = F.description
 end
 
 module RasterBand = struct
@@ -40,6 +51,7 @@ module Dataset = struct
 
   let open' file access : t = F.Dataset.open' file access
   let close = F.Dataset.close
+  let description v = F.description v
 
   let geo_transform v =
     let open Ctypes in
@@ -50,6 +62,13 @@ module Dataset = struct
     match F.Dataset.geo_transform v (addr arr) with
     | `None -> Ok arr
     | (`Debug | `Warning | `Failure) as e -> Error e
+
+  let translate ~dst ~options dataset =
+    let open Ctypes in
+    let arr = CArray.of_list string options in
+    let options = F.Dataset.translate_options_new (CArray.start arr) null in
+    let x = allocate int 0 in
+    F.Dataset.translate dst dataset options x
 
   let raster_band = F.Dataset.raster_band
   let raster_count = F.Dataset.raster_count

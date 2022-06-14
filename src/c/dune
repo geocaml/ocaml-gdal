@@ -8,7 +8,7 @@
   (external_library_name gdal)
   (build_flags_resolver pkg_config)
   (headers
-   (include "gdal.h"))
+   (include "gdal.h" "gdal_utils.h"))
   (type_description
    (instance Type)
    (functor Type_description))

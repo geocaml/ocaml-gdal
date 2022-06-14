@@ -20,11 +20,14 @@ module Driver : sig
   type t
   (** Drivers roughly correspond to file formats. *)
 
-  val get_by_name : string -> t
+  val get_by_name : string -> (t, [ `Msg of string ]) result
   (** [get_by_name name] tries to find the driver associated with [name] (e.g. ["MEM"]). *)
 
   val get_count : unit -> int
   (** [get_count ()] gets the number of registered drivers. *)
+
+  val description : t -> string
+  (** The objects description *)
 end
 
 module RasterBand : sig
@@ -53,12 +56,18 @@ module Dataset : sig
   val close : t -> unit
   (** [close d] closes the dataset [d]. *)
 
+  val description : t -> string
+  (** The objects description *)
+
   val geo_transform :
     t ->
     ( (float, Bigarray.float64_elt, Bigarray.c_layout) Bigarray.Array1.t,
       Error.t )
     result
   (** Fetch the affine transformation coefficients. *)
+
+  val translate : dst:string -> options:string list -> t -> t
+  (* Converts raster data between different formats. *)
 
   (** {3 Raster Bands}*)
 

@@ -4,6 +4,9 @@ module T = Types_generated
 module Functions (F : Ctypes.FOREIGN) = struct
   open F
 
+  let all_register = foreign "GDALAllRegister" (void @-> returning void)
+  let description = foreign "GDALGetDescription" (ptr void @-> returning string)
+
   module Datatype = struct
     let get_size =
       foreign "GDALGetDataTypeSizeBytes" (T.Datatype.t @-> returning int)
@@ -40,6 +43,16 @@ module Functions (F : Ctypes.FOREIGN) = struct
     let geo_transform =
       foreign "GDALGetGeoTransform"
         (T.Dataset.t @-> ptr double @-> returning T.Error.t)
+
+    let translate =
+      foreign "GDALTranslate"
+        (string @-> T.Dataset.t
+        @-> ptr T.Dataset.translate_options
+        @-> ptr int @-> returning T.Dataset.t)
+
+    let translate_options_new =
+      foreign "GDALTranslateOptionsNew"
+        (ptr string @-> ptr void @-> returning (ptr T.Dataset.translate_options))
 
     let raster_count =
       foreign "GDALGetRasterCount" (T.Dataset.t @-> returning int)

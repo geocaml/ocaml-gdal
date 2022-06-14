@@ -96,6 +96,12 @@ module Types (F : TYPE) = struct
 
   module Dataset = struct
     let t = typedef (ptr void) "GDALDatasetH"
+
+    type translate_options
+
+    let translate_options : translate_options Ctypes_static.structure F.typ =
+      let s = structure "GDALTranslateOptions" in
+      typedef s "GDALTranslateOptions"
   end
 
   module Driver = struct
