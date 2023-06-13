@@ -20,9 +20,14 @@ module Functions (F : Ctypes.FOREIGN) = struct
       foreign "GDALGetDriverByName" (string @-> returning T.Driver.t)
 
     let get_count = foreign "GDALGetDriverCount" (void @-> returning int)
+
+    let create = foreign "GDALCreate" (T.Driver.t @-> string @-> int @-> int @-> int @-> T.Datatype.t @-> ptr string @-> returning T.Dataset.t)
   end
 
   module RasterBand = struct
+    (* TODO: Not the right write I think... *)
+    let write = foreign "GDALWriteBlock" (T.RasterBand.t @-> int @-> int @-> ptr float @-> returning T.Error.t)
+
     let x_size =
       foreign "GDALGetRasterBandXSize" (T.RasterBand.t @-> returning int)
 
@@ -66,5 +71,11 @@ module Functions (F : Ctypes.FOREIGN) = struct
 
     let raster_y_size =
       foreign "GDALGetRasterYSize" (T.Dataset.t @-> returning int)
+
+    let set_geo_transform =
+      foreign "GDALSetGeoTransform" (T.Dataset.t @-> ptr float @-> returning T.Error.t)
+
+    let set_projection =
+      foreign "GDALSetProjection" (T.Dataset.t @-> string @-> returning T.Error.t)
   end
 end

@@ -3,6 +3,8 @@ module F = Gdal_c.C.Functions
 
 module Error : sig
   type t = [ `Debug | `Warning | `Failure ]
+
+  val to_msg : t -> [ `Msg of string ]
 end
 
 module Datatype : sig
@@ -16,22 +18,10 @@ module Datatype : sig
   (** [signed t] returns whether or not the data type is signed. *)
 end
 
-module Driver : sig
-  type t
-  (** Drivers roughly correspond to file formats. *)
-
-  val get_by_name : string -> (t, [ `Msg of string ]) result
-  (** [get_by_name name] tries to find the driver associated with [name] (e.g. ["MEM"]). *)
-
-  val get_count : unit -> int
-  (** [get_count ()] gets the number of registered drivers. *)
-
-  val description : t -> string
-  (** The objects description *)
-end
-
 module RasterBand : sig
   type t
+
+  val write : x:int -> y:int -> t -> (float, Bigarray.float64_elt, Bigarray.c_layout) Bigarray.Array1.t -> (unit, T.Error.t) result
 
   val x_size : t -> int
   (** [x_size t] returns the XSize of the raster band [t]. *)
@@ -82,4 +72,36 @@ module Dataset : sig
 
   val raster_y_size : t -> int
   (** The raster height in pixels. *)
+
+  val set_geo_transform : t -> float list -> (unit, Error.t) result
+  (** Set the affine transformation coefficients *)
+
+  val set_projection : t -> string -> (unit, Error.t) result
+  (** Set the projection reference string *)
 end
+
+module Driver : sig
+  type t
+  (** Drivers roughly correspond to file formats. *)
+
+  val get_by_name : string -> (t, [> `Msg of string ]) result
+  (** [get_by_name name] tries to find the driver associated with [name] (e.g. ["MEM"]). *)
+
+  val get_count : unit -> int
+  (** [get_count ()] gets the number of registered drivers. *)
+
+  val description : t -> string
+  (** The objects description *)
+
+  val create :
+    ?options:string list ->
+    sw:Eio.Switch.t ->
+    filename:string ->
+    xsize:int ->
+    ysize:int ->
+    bands:int ->
+    typ:Datatype.t ->
+    t -> Dataset.t
+    (** Create a new dataset from a driver, the dataset will be closed when the switch also closes. *)
+end
+
